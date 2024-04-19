@@ -5,7 +5,6 @@ import bz2
 import argparse
 from scipy.optimize import curve_fit
 from random import seed, choice
-from ast import literal_eval
 import statsmodels.api as sm
 
 # Analysis Script
