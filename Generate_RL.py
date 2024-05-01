@@ -10,12 +10,12 @@ import copy
 # Authors:
 #           Miko Stulajter
 #
-# Version 1.0.0
+# Version 1.2.0
 #
 
 def argParsing():
     parser = argparse.ArgumentParser(description='Generate a lattice network.')
-    
+
     parser.add_argument('-l1',
     help="Length of side (used for all dimensions).",
     dest='l1',
@@ -23,7 +23,7 @@ def argParsing():
     required=True)
 
     parser.add_argument('-d',
-    help="Number of dimensions (up to 4 for bc=2 or rP>0).",
+    help="Number of dimensions (up to 5 for bc=2 or rP>0).",
     dest='d',
     type=int,
     required=True)
@@ -77,7 +77,10 @@ def main():
 
     ### ~~~~~~ Generate network if non-periodic and rewiring probability is nonzero
     elif args.bc == 1 and args.rp != 0:
-        filename="RL-NP_R-"+str(args.rp)+"_L"+str(args.l1)+"_d-"+str(args.d)+'.graphml.bz2'
+        if (args.ofile):
+            filename=args.ofile+'.graphml.bz2'
+        else:
+            filename="RL-NP_R-"+str(args.rp)+"_L"+str(args.l1)+"_d-"+str(args.d)+'.graphml.bz2'
         if args.d == 1:
             generate_1D_NP_RP(filename,args.l1,args.rp)
         elif  args.d == 2:
@@ -86,12 +89,17 @@ def main():
             generate_3D_NP_RP(filename,args.l1,args.rp)
         elif  args.d == 4:
             generate_4D_NP_RP(filename,args.l1,args.rp)
+        elif  args.d == 5:
+            generate_5D_NP_RP(filename,args.l1,args.rp)
         else:
-            print("Not a valid dimension for non-periodic boundary conditions with a rewiring probability. Only a value of 1,2,3, and 4 are valid.")
+            print("Not a valid dimension for non-periodic boundary conditions with a rewiring probability. Only a value of 1,2,3,5, and 5 are valid.")
 
     ### ~~~~~~ Generate network if periodic and rewiring probability is zero
     elif args.bc == 2 and args.rp == 0:
-        filename="RL-P_L"+str(args.l1)+"_d-"+str(args.d)+'.graphml.bz2'
+        if (args.ofile):
+            filename=args.ofile+'.graphml.bz2'
+        else:
+            filename="RL-P_L"+str(args.l1)+"_d-"+str(args.d)+'.graphml.bz2'
         if args.d == 1:
             generate_1D_P(filename,args.l1)
         elif  args.d == 2:
@@ -100,12 +108,17 @@ def main():
             generate_3D_P(filename,args.l1)
         elif  args.d == 4:
             generate_4D_P(filename,args.l1)
+        elif  args.d == 5:
+            generate_5D_P(filename,args.l1)
         else:
-            print("Not a valid dimension for periodic boundary conditions. Only a value of 1,2,3, and 4 are valid.")
+            print("Not a valid dimension for periodic boundary conditions. Only a value of 1,2,3,4, and 5 are valid.")
 
     ### ~~~~~~ Generate network if periodic and rewiring probability is nonzero
     else:
-        filename="RL-P_R-"+str(args.rp)+"_L"+str(args.l1)+"_d-"+str(args.d)+'.graphml.bz2'
+        if (args.ofile):
+            filename=args.ofile+'.graphml.bz2'
+        else:
+            filename="RL-P_R-"+str(args.rp)+"_L"+str(args.l1)+"_d-"+str(args.d)+'.graphml.bz2'
         if args.d == 1:
             generate_1D_P_RP(filename,args.l1,args.rp)
         elif  args.d == 2:
@@ -114,8 +127,10 @@ def main():
             generate_3D_P_RP(filename,args.l1,args.rp)
         elif  args.d == 4:
             generate_4D_P_RP(filename,args.l1,args.rp)
+        elif  args.d == 5:
+            generate_5D_P_RP(filename,args.l1,args.rp)
         else:
-            print("Not a valid dimension for periodic boundary conditions with a rewiring probability. Only a value of 1,2,3, and 4 are valid.")
+            print("Not a valid dimension for periodic boundary conditions with a rewiring probability. Only a value of 1,2,3,4, and 5 are valid.")
 
 
 def generate_1D_P(filename,N):
@@ -132,7 +147,7 @@ def generate_1D_P(filename,N):
             if i==Nm1:
                 f.write('    <edge source="(%d)" target="(%d)" />\n' % (i,0))
             else:
-                f.write('    <edge source="(%d)" target="(%d)" />\n' % (i,i+1))     
+                f.write('    <edge source="(%d)" target="(%d)" />\n' % (i,i+1))
 
         f.write('  </graph>\n')
         f.write('</graphml>')
@@ -321,6 +336,220 @@ def generate_4D_P(filename,N):
         f.write('  </graph>\n')
         f.write('</graphml>')
 
+def generate_5D_P(filename,N):
+    Nm1=N-1
+    with bz2.open(filename, 'wt') as f:
+        f.write("<?xml version='1.0' encoding='utf-8'?>\n")
+        f.write('<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">\n')
+        f.write('  <graph edgedefault="undirected">\n')
+
+        for i in range(0,N):
+            for j in range(0,N):
+                for k in range(0,N):
+                    for m in range(0,N):
+                        for z in range(0,N):
+                            f.write('    <node id="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z))
+
+        for i in range(0,N):
+            for j in range(0,N):
+                for k in range(0,N):
+                    for m in range(0,N):
+                        for z in range(0,N):
+                            if i==Nm1 and j==Nm1 and k==Nm1 and m==Nm1 and z==Nm1:
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m,0))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,0,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,0,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,0,k,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,0,j,k,m,z))
+                            elif i==Nm1 and j==Nm1 and k==Nm1 and m==Nm1:
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m,z+1))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,0,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,0,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,0,k,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,0,j,k,m,z))
+                            elif i==Nm1 and j==Nm1 and k==Nm1 and z==Nm1:
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m,0))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m+1,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,0,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,0,k,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,0,j,k,m,z))
+                            elif i==Nm1 and j==Nm1 and m==Nm1 and z==Nm1:
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m,0))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,0,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k+1,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,0,k,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,0,j,k,m,z))
+                            elif i==Nm1 and k==Nm1 and m==Nm1 and z==Nm1:
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m,0))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,0,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,0,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j+1,k,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,0,j,k,m,z))
+                            elif j==Nm1 and k==Nm1 and m==Nm1 and z==Nm1:
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m,0))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,0,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,0,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,0,k,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i+1,j,k,m,z))
+                            elif i==Nm1 and j==Nm1 and k==Nm1:
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m,z+1))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m+1,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,0,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,0,k,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,0,j,k,m,z))
+                            elif i==Nm1 and j==Nm1 and z==Nm1:
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m,0))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m+1,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k+1,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,0,k,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,0,j,k,m,z))
+                            elif i==Nm1 and j==Nm1 and m==Nm1:
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m,z+1))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,0,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k+1,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,0,k,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,0,j,k,m,z))
+                            elif i==Nm1 and k==Nm1 and m==Nm1:
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m,z+1))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,0,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,0,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j+1,k,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,0,j,k,m,z))
+                            elif i==Nm1 and k==Nm1 and z==Nm1:
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m,0))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m+1,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,0,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j+1,k,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,0,j,k,m,z))
+                            elif i==Nm1 and m==Nm1 and z==Nm1:
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m,0))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,0,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k+1,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j+1,k,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,0,j,k,m,z))
+                            elif k==Nm1 and m==Nm1 and z==Nm1:
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m,0))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,0,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,0,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j+1,k,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i+1,j,k,m,z))
+                            elif j==Nm1 and m==Nm1 and z==Nm1:
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m,0))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,0,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k+1,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,0,k,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i+1,j,k,m,z))
+                            elif j==Nm1 and k==Nm1 and z==Nm1:
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m,0))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m+1,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,0,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,0,k,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i+1,j,k,m,z))
+                            elif j==Nm1 and k==Nm1 and m==Nm1:
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m,z+1))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,0,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,0,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,0,k,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i+1,j,k,m,z))
+                            elif i==Nm1 and j==Nm1:
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m,z+1))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m+1,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k+1,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,0,k,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,0,j,k,m,z))
+                            elif i==Nm1 and k==Nm1:
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m,z+1))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m+1,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,0,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j+1,k,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,0,j,k,m,z))
+                            elif i==Nm1 and m==Nm1:
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m,z+1))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,0,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k+1,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j+1,k,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,0,j,k,m,z))
+                            elif i==Nm1 and z==Nm1:
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m,0))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m+1,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k+1,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j+1,k,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,0,j,k,m,z))
+                            elif j==Nm1 and k==Nm1:
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m,z+1))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m+1,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,0,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,0,k,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i+1,j,k,m,z))
+                            elif j==Nm1 and m==Nm1:
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m,z+1))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,0,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k+1,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,0,k,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i+1,j,k,m,z))
+                            elif j==Nm1 and z==Nm1:
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m,0))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m+1,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k+1,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,0,k,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i+1,j,k,m,z))
+                            elif k==Nm1 and m==Nm1:
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m,z+1))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,0,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,0,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j+1,k,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i+1,j,k,m,z))
+                            elif k==Nm1 and z==Nm1:
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m,0))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m+1,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,0,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j+1,k,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i+1,j,k,m,z))
+                            elif m==Nm1 and z==Nm1:
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m,0))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,0,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k+1,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j+1,k,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i+1,j,k,m,z))
+                            elif i==Nm1:
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m,z+1))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m+1,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k+1,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j+1,k,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,0,j,k,m,z))
+                            elif j==Nm1:
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m,z+1))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m+1,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k+1,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,0,k,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i+1,j,k,m,z))
+                            elif k==Nm1:
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m,z+1))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m+1,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,0,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j+1,k,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i+1,j,k,m,z))
+                            elif m==Nm1:
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m,z+1))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,0,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k+1,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j+1,k,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i+1,j,k,m,z))
+                            elif z==Nm1:
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m,0))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m+1,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k+1,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j+1,k,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i+1,j,k,m,z))
+                            else:
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m,z+1))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k,m+1,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j,k+1,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i,j+1,k,m,z))
+                                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z,i+1,j,k,m,z))
+        f.write('  </graph>\n')
+        f.write('</graphml>')
+
 
 def generate_1D_NP_RP(filename,N,pR):
     Nm1=N-1
@@ -413,7 +642,7 @@ def generate_2D_NP_RP(filename,N,pR):
                 f.write('    <edge source="(%d, %d)" target="(%d, %d)" />\n' % (src[0],src[1],tar[0],tar[1]))
 
         f.write('  </graph>\n')
-        f.write('</graphml>')        
+        f.write('</graphml>')
 
 
 def generate_3D_NP_RP(filename,N,pR):
@@ -478,7 +707,6 @@ def generate_3D_NP_RP(filename,N,pR):
 
         f.write('  </graph>\n')
         f.write('</graphml>')
-
 
 def generate_4D_NP_RP(filename,N,pR):
     Nm1=N-1
@@ -573,6 +801,164 @@ def generate_4D_NP_RP(filename,N,pR):
         f.write('  </graph>\n')
         f.write('</graphml>')
 
+def generate_5D_NP_RP(filename,N):
+    Nm1=N-1
+    with bz2.open(filename, 'wt') as f:
+        f.write("<?xml version='1.0' encoding='utf-8'?>\n")
+        f.write('<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">\n')
+        f.write('  <graph edgedefault="undirected">\n')
+
+        nodes=[]
+        edges=[]
+
+        for i in range(0,N):
+            for j in range(0,N):
+                for k in range(0,N):
+                    for m in range(0,N):
+                        for z in range(0,N):
+                            nodes.append([i,j,k,m,z])
+                            f.write('    <node id="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z))
+
+        for i in range(0,N):
+            for j in range(0,N):
+                for k in range(0,N):
+                    for m in range(0,N):
+                        for z in range(0,N):
+                            if i==Nm1 and j==Nm1 and k==Nm1 and m==Nm1 and z==Nm1:
+                                continue
+                            elif i==Nm1 and j==Nm1 and k==Nm1 and m==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,z+1])
+                            elif i==Nm1 and j==Nm1 and k==Nm1 and z==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m+1,z])
+                            elif i==Nm1 and j==Nm1 and m==Nm1 and z==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k+1,m,z])
+                            elif i==Nm1 and k==Nm1 and m==Nm1 and z==Nm1:
+                                edges.append([i,j,k,m,z,i,j+1,k,m,z])
+                            elif j==Nm1 and k==Nm1 and m==Nm1 and z==Nm1:
+                                edges.append([i,j,k,m,z,i+1,j,k,m,z])
+                            elif i==Nm1 and j==Nm1 and k==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,z+1])
+                                edges.append([i,j,k,m,z,i,j,k,m+1,z])
+                            elif i==Nm1 and j==Nm1 and z==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m+1,z])
+                                edges.append([i,j,k,m,z,i,j,k+1,m,z])
+                            elif i==Nm1 and j==Nm1 and m==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,z+1])
+                                edges.append([i,j,k,m,z,i,j,k+1,m,z])
+                            elif i==Nm1 and k==Nm1 and m==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,z+1])
+                                edges.append([i,j,k,m,z,i,j+1,k,m,z])
+                            elif i==Nm1 and k==Nm1 and z==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m+1,z])
+                                edges.append([i,j,k,m,z,i,j+1,k,m,z])
+                            elif i==Nm1 and m==Nm1 and z==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k+1,m,z])
+                                edges.append([i,j,k,m,z,i,j+1,k,m,z])
+                            elif k==Nm1 and m==Nm1 and z==Nm1:
+                                edges.append([i,j,k,m,z,i,j+1,k,m,z])
+                                edges.append([i,j,k,m,z,i+1,j,k,m,z])
+                            elif j==Nm1 and m==Nm1 and z==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k+1,m,z])
+                                edges.append([i,j,k,m,z,i+1,j,k,m,z])
+                            elif j==Nm1 and k==Nm1 and z==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m+1,z])
+                                edges.append([i,j,k,m,z,i+1,j,k,m,z])
+                            elif j==Nm1 and k==Nm1 and m==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,z+1])
+                                edges.append([i,j,k,m,z,i+1,j,k,m,z])
+                            elif i==Nm1 and j==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,z+1])
+                                edges.append([i,j,k,m,z,i,j,k,m+1,z])
+                                edges.append([i,j,k,m,z,i,j,k+1,m,z])
+                            elif i==Nm1 and k==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,z+1])
+                                edges.append([i,j,k,m,z,i,j,k,m+1,z])
+                                edges.append([i,j,k,m,z,i,j+1,k,m,z])
+                            elif i==Nm1 and m==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,z+1])
+                                edges.append([i,j,k,m,z,i,j,k+1,m,z])
+                                edges.append([i,j,k,m,z,i,j+1,k,m,z])
+                            elif i==Nm1 and z==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m+1,z])
+                                edges.append([i,j,k,m,z,i,j,k+1,m,z])
+                                edges.append([i,j,k,m,z,i,j+1,k,m,z])
+                            elif j==Nm1 and k==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,z+1])
+                                edges.append([i,j,k,m,z,i,j,k,m+1,z])
+                                edges.append([i,j,k,m,z,i+1,j,k,m,z])
+                            elif j==Nm1 and m==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,z+1])
+                                edges.append([i,j,k,m,z,i,j,k+1,m,z])
+                                edges.append([i,j,k,m,z,i+1,j,k,m,z])
+                            elif j==Nm1 and z==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m+1,z])
+                                edges.append([i,j,k,m,z,i,j,k+1,m,z])
+                                edges.append([i,j,k,m,z,i+1,j,k,m,z])
+                            elif k==Nm1 and m==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,z+1])
+                                edges.append([i,j,k,m,z,i,j+1,k,m,z])
+                                edges.append([i,j,k,m,z,i+1,j,k,m,z])
+                            elif k==Nm1 and z==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m+1,z])
+                                edges.append([i,j,k,m,z,i,j+1,k,m,z])
+                                edges.append([i,j,k,m,z,i+1,j,k,m,z])
+                            elif m==Nm1 and z==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k+1,m,z])
+                                edges.append([i,j,k,m,z,i,j+1,k,m,z])
+                                edges.append([i,j,k,m,z,i+1,j,k,m,z])
+                            elif i==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,z+1])
+                                edges.append([i,j,k,m,z,i,j,k,m+1,z])
+                                edges.append([i,j,k,m,z,i,j,k+1,m,z])
+                                edges.append([i,j,k,m,z,i,j+1,k,m,z])
+                            elif j==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,z+1])
+                                edges.append([i,j,k,m,z,i,j,k,m+1,z])
+                                edges.append([i,j,k,m,z,i,j,k+1,m,z])
+                                edges.append([i,j,k,m,z,i+1,j,k,m,z])
+                            elif k==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,z+1])
+                                edges.append([i,j,k,m,z,i,j,k,m+1,z])
+                                edges.append([i,j,k,m,z,i,j+1,k,m,z])
+                                edges.append([i,j,k,m,z,i+1,j,k,m,z])
+                            elif m==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,z+1])
+                                edges.append([i,j,k,m,z,i,j,k+1,m,z])
+                                edges.append([i,j,k,m,z,i,j+1,k,m,z])
+                                edges.append([i,j,k,m,z,i+1,j,k,m,z])
+                            elif z==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m+1,z])
+                                edges.append([i,j,k,m,z,i,j,k+1,m,z])
+                                edges.append([i,j,k,m,z,i,j+1,k,m,z])
+                                edges.append([i,j,k,m,z,i+1,j,k,m,z])
+                            else:
+                                edges.append([i,j,k,m,z,i,j,k,m,z+1])
+                                edges.append([i,j,k,m,z,i,j,k,m+1,z])
+                                edges.append([i,j,k,m,z,i,j,k+1,m,z])
+                                edges.append([i,j,k,m,z,i,j+1,k,m,z])
+                                edges.append([i,j,k,m,z,i+1,j,k,m,z])
+
+        cpy_edges = edges[:]
+        edgesAdded = copy.deepcopy(edges)
+        for ed in cpy_edges:
+            src=ed[0:5]
+            tar=ed[5:10]
+            if random.random() < pR:
+                tar = random.choice(nodes)
+                o1=[src[0],src[1],src[2],src[3],src[4],tar[0],tar[1],tar[2],tar[3],tar[4]]
+                o2=[tar[0],tar[1],tar[2],tar[3],tar[4],src[0],src[1],src[2],src[3],src[4]]
+                while tar == src or o1 in edgesAdded or o2 in edgesAdded:
+                    o1=[src[0],src[1],src[2],src[3],src[4],tar[0],tar[1],tar[2],tar[3],tar[4]]
+                    o2=[tar[0],tar[1],tar[2],tar[3],tar[4],src[0],src[1],src[2],src[3],src[4]]
+                    tar = random.choice(nodes)
+                edgesAdded.append([src[0],src[1],src[2],src[3],src[4],tar[0],tar[1],tar[2],tar[3],tar[4]])
+                edgesAdded.remove(ed)
+                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (src[0],src[1],src[2],src[3],src[4],tar[0],tar[1],tar[2],tar[3],tar[4]))
+            else:
+                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (src[0],src[1],src[2],src[3],src[4],tar[0],tar[1],tar[2],tar[3],tar[4]))
+
+        f.write('  </graph>\n')
+        f.write('</graphml>')
 
 def generate_1D_P_RP(filename,N,pR):
     Nm1=N-1
@@ -615,7 +1001,6 @@ def generate_1D_P_RP(filename,N,pR):
 
         f.write('  </graph>\n')
         f.write('</graphml>')
-
 
 def generate_2D_P_RP(filename,N,pR):
     Nm1=N-1
@@ -668,7 +1053,7 @@ def generate_2D_P_RP(filename,N,pR):
                 f.write('    <edge source="(%d, %d)" target="(%d, %d)" />\n' % (src[0],src[1],tar[0],tar[1]))
 
         f.write('  </graph>\n')
-        f.write('</graphml>')        
+        f.write('</graphml>')
 
 
 def generate_3D_P_RP(filename,N,pR):
@@ -744,7 +1129,6 @@ def generate_3D_P_RP(filename,N,pR):
 
         f.write('  </graph>\n')
         f.write('</graphml>')
-
 
 def generate_4D_P_RP(filename,N,pR):
     Nm1=N-1
@@ -870,7 +1254,244 @@ def generate_4D_P_RP(filename,N,pR):
         f.write('  </graph>\n')
         f.write('</graphml>')
 
+def generate_5D_P_RP(filename,N):
+    Nm1=N-1
+    with bz2.open(filename, 'wt') as f:
+        f.write("<?xml version='1.0' encoding='utf-8'?>\n")
+        f.write('<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">\n')
+        f.write('  <graph edgedefault="undirected">\n')
+
+        nodes=[]
+        edges=[]
+
+        for i in range(0,N):
+            for j in range(0,N):
+                for k in range(0,N):
+                    for m in range(0,N):
+                        for z in range(0,N):
+                            nodes.append([i,j,k,m,z])
+                            f.write('    <node id="(%d, %d, %d, %d, %d)" />\n' % (i,j,k,m,z))
+
+        for i in range(0,N):
+            for j in range(0,N):
+                for k in range(0,N):
+                    for m in range(0,N):
+                        for z in range(0,N):
+                            if i==Nm1 and j==Nm1 and k==Nm1 and m==Nm1 and z==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,0])
+                                edges.append([i,j,k,m,z,i,j,k,0,z])
+                                edges.append([i,j,k,m,z,i,j,0,m,z])
+                                edges.append([i,j,k,m,z,i,0,k,m,z])
+                                edges.append([i,j,k,m,z,0,j,k,m,z])
+                            elif i==Nm1 and j==Nm1 and k==Nm1 and m==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,z+1])
+                                edges.append([i,j,k,m,z,i,j,k,0,z])
+                                edges.append([i,j,k,m,z,i,j,0,m,z])
+                                edges.append([i,j,k,m,z,i,0,k,m,z])
+                                edges.append([i,j,k,m,z,0,j,k,m,z])
+                            elif i==Nm1 and j==Nm1 and k==Nm1 and z==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,0])
+                                edges.append([i,j,k,m,z,i,j,k,m+1,z])
+                                edges.append([i,j,k,m,z,i,j,0,m,z])
+                                edges.append([i,j,k,m,z,i,0,k,m,z])
+                                edges.append([i,j,k,m,z,0,j,k,m,z])
+                            elif i==Nm1 and j==Nm1 and m==Nm1 and z==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,0])
+                                edges.append([i,j,k,m,z,i,j,k,0,z])
+                                edges.append([i,j,k,m,z,i,j,k+1,m,z])
+                                edges.append([i,j,k,m,z,i,0,k,m,z])
+                                edges.append([i,j,k,m,z,0,j,k,m,z])
+                            elif i==Nm1 and k==Nm1 and m==Nm1 and z==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,0])
+                                edges.append([i,j,k,m,z,i,j,k,0,z])
+                                edges.append([i,j,k,m,z,i,j,0,m,z])
+                                edges.append([i,j,k,m,z,i,j+1,k,m,z])
+                                edges.append([i,j,k,m,z,0,j,k,m,z])
+                            elif j==Nm1 and k==Nm1 and m==Nm1 and z==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,0])
+                                edges.append([i,j,k,m,z,i,j,k,0,z])
+                                edges.append([i,j,k,m,z,i,j,0,m,z])
+                                edges.append([i,j,k,m,z,i,0,k,m,z])
+                                edges.append([i,j,k,m,z,i+1,j,k,m,z])
+                            elif i==Nm1 and j==Nm1 and k==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,z+1])
+                                edges.append([i,j,k,m,z,i,j,k,m+1,z])
+                                edges.append([i,j,k,m,z,i,j,0,m,z])
+                                edges.append([i,j,k,m,z,i,0,k,m,z])
+                                edges.append([i,j,k,m,z,0,j,k,m,z])
+                            elif i==Nm1 and j==Nm1 and z==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,0])
+                                edges.append([i,j,k,m,z,i,j,k,m+1,z])
+                                edges.append([i,j,k,m,z,i,j,k+1,m,z])
+                                edges.append([i,j,k,m,z,i,0,k,m,z])
+                                edges.append([i,j,k,m,z,0,j,k,m,z])
+                            elif i==Nm1 and j==Nm1 and m==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,z+1])
+                                edges.append([i,j,k,m,z,i,j,k,0,z])
+                                edges.append([i,j,k,m,z,i,j,k+1,m,z])
+                                edges.append([i,j,k,m,z,i,0,k,m,z])
+                                edges.append([i,j,k,m,z,0,j,k,m,z])
+                            elif i==Nm1 and k==Nm1 and m==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,z+1])
+                                edges.append([i,j,k,m,z,i,j,k,0,z])
+                                edges.append([i,j,k,m,z,i,j,0,m,z])
+                                edges.append([i,j,k,m,z,i,j+1,k,m,z])
+                                edges.append([i,j,k,m,z,0,j,k,m,z])
+                            elif i==Nm1 and k==Nm1 and z==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,0])
+                                edges.append([i,j,k,m,z,i,j,k,m+1,z])
+                                edges.append([i,j,k,m,z,i,j,0,m,z])
+                                edges.append([i,j,k,m,z,i,j+1,k,m,z])
+                                edges.append([i,j,k,m,z,0,j,k,m,z])
+                            elif i==Nm1 and m==Nm1 and z==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,0])
+                                edges.append([i,j,k,m,z,i,j,k,0,z])
+                                edges.append([i,j,k,m,z,i,j,k+1,m,z])
+                                edges.append([i,j,k,m,z,i,j+1,k,m,z])
+                                edges.append([i,j,k,m,z,0,j,k,m,z])
+                            elif k==Nm1 and m==Nm1 and z==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,0])
+                                edges.append([i,j,k,m,z,i,j,k,0,z])
+                                edges.append([i,j,k,m,z,i,j,0,m,z])
+                                edges.append([i,j,k,m,z,i,j+1,k,m,z])
+                                edges.append([i,j,k,m,z,i+1,j,k,m,z])
+                            elif j==Nm1 and m==Nm1 and z==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,0])
+                                edges.append([i,j,k,m,z,i,j,k,0,z])
+                                edges.append([i,j,k,m,z,i,j,k+1,m,z])
+                                edges.append([i,j,k,m,z,i,0,k,m,z])
+                                edges.append([i,j,k,m,z,i+1,j,k,m,z])
+                            elif j==Nm1 and k==Nm1 and z==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,0])
+                                edges.append([i,j,k,m,z,i,j,k,m+1,z])
+                                edges.append([i,j,k,m,z,i,j,0,m,z])
+                                edges.append([i,j,k,m,z,i,0,k,m,z])
+                                edges.append([i,j,k,m,z,i+1,j,k,m,z])
+                            elif j==Nm1 and k==Nm1 and m==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,z+1])
+                                edges.append([i,j,k,m,z,i,j,k,0,z])
+                                edges.append([i,j,k,m,z,i,j,0,m,z])
+                                edges.append([i,j,k,m,z,i,0,k,m,z])
+                                edges.append([i,j,k,m,z,i+1,j,k,m,z])
+                            elif i==Nm1 and j==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,z+1])
+                                edges.append([i,j,k,m,z,i,j,k,m+1,z])
+                                edges.append([i,j,k,m,z,i,j,k+1,m,z])
+                                edges.append([i,j,k,m,z,i,0,k,m,z])
+                                edges.append([i,j,k,m,z,0,j,k,m,z])
+                            elif i==Nm1 and k==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,z+1])
+                                edges.append([i,j,k,m,z,i,j,k,m+1,z])
+                                edges.append([i,j,k,m,z,i,j,0,m,z])
+                                edges.append([i,j,k,m,z,i,j+1,k,m,z])
+                                edges.append([i,j,k,m,z,0,j,k,m,z])
+                            elif i==Nm1 and m==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,z+1])
+                                edges.append([i,j,k,m,z,i,j,k,0,z])
+                                edges.append([i,j,k,m,z,i,j,k+1,m,z])
+                                edges.append([i,j,k,m,z,i,j+1,k,m,z])
+                                edges.append([i,j,k,m,z,0,j,k,m,z])
+                            elif i==Nm1 and z==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,0])
+                                edges.append([i,j,k,m,z,i,j,k,m+1,z])
+                                edges.append([i,j,k,m,z,i,j,k+1,m,z])
+                                edges.append([i,j,k,m,z,i,j+1,k,m,z])
+                                edges.append([i,j,k,m,z,0,j,k,m,z])
+                            elif j==Nm1 and k==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,z+1])
+                                edges.append([i,j,k,m,z,i,j,k,m+1,z])
+                                edges.append([i,j,k,m,z,i,j,0,m,z])
+                                edges.append([i,j,k,m,z,i,0,k,m,z])
+                                edges.append([i,j,k,m,z,i+1,j,k,m,z])
+                            elif j==Nm1 and m==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,z+1])
+                                edges.append([i,j,k,m,z,i,j,k,0,z])
+                                edges.append([i,j,k,m,z,i,j,k+1,m,z])
+                                edges.append([i,j,k,m,z,i,0,k,m,z])
+                                edges.append([i,j,k,m,z,i+1,j,k,m,z])
+                            elif j==Nm1 and z==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,0])
+                                edges.append([i,j,k,m,z,i,j,k,m+1,z])
+                                edges.append([i,j,k,m,z,i,j,k+1,m,z])
+                                edges.append([i,j,k,m,z,i,0,k,m,z])
+                                edges.append([i,j,k,m,z,i+1,j,k,m,z])
+                            elif k==Nm1 and m==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,z+1])
+                                edges.append([i,j,k,m,z,i,j,k,0,z])
+                                edges.append([i,j,k,m,z,i,j,0,m,z])
+                                edges.append([i,j,k,m,z,i,j+1,k,m,z])
+                                edges.append([i,j,k,m,z,i+1,j,k,m,z])
+                            elif k==Nm1 and z==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,0])
+                                edges.append([i,j,k,m,z,i,j,k,m+1,z])
+                                edges.append([i,j,k,m,z,i,j,0,m,z])
+                                edges.append([i,j,k,m,z,i,j+1,k,m,z])
+                                edges.append([i,j,k,m,z,i+1,j,k,m,z])
+                            elif m==Nm1 and z==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,0])
+                                edges.append([i,j,k,m,z,i,j,k,0,z])
+                                edges.append([i,j,k,m,z,i,j,k+1,m,z])
+                                edges.append([i,j,k,m,z,i,j+1,k,m,z])
+                                edges.append([i,j,k,m,z,i+1,j,k,m,z])
+                            elif i==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,z+1])
+                                edges.append([i,j,k,m,z,i,j,k,m+1,z])
+                                edges.append([i,j,k,m,z,i,j,k+1,m,z])
+                                edges.append([i,j,k,m,z,i,j+1,k,m,z])
+                                edges.append([i,j,k,m,z,0,j,k,m,z])
+                            elif j==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,z+1])
+                                edges.append([i,j,k,m,z,i,j,k,m+1,z])
+                                edges.append([i,j,k,m,z,i,j,k+1,m,z])
+                                edges.append([i,j,k,m,z,i,0,k,m,z])
+                                edges.append([i,j,k,m,z,i+1,j,k,m,z])
+                            elif k==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,z+1])
+                                edges.append([i,j,k,m,z,i,j,k,m+1,z])
+                                edges.append([i,j,k,m,z,i,j,0,m,z])
+                                edges.append([i,j,k,m,z,i,j+1,k,m,z])
+                                edges.append([i,j,k,m,z,i+1,j,k,m,z])
+                            elif m==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,z+1])
+                                edges.append([i,j,k,m,z,i,j,k,0,z])
+                                edges.append([i,j,k,m,z,i,j,k+1,m,z])
+                                edges.append([i,j,k,m,z,i,j+1,k,m,z])
+                                edges.append([i,j,k,m,z,i+1,j,k,m,z])
+                            elif z==Nm1:
+                                edges.append([i,j,k,m,z,i,j,k,m,0])
+                                edges.append([i,j,k,m,z,i,j,k,m+1,z])
+                                edges.append([i,j,k,m,z,i,j,k+1,m,z])
+                                edges.append([i,j,k,m,z,i,j+1,k,m,z])
+                                edges.append([i,j,k,m,z,i+1,j,k,m,z])
+                            else:
+                                edges.append([i,j,k,m,z,i,j,k,m,z+1])
+                                edges.append([i,j,k,m,z,i,j,k,m+1,z])
+                                edges.append([i,j,k,m,z,i,j,k+1,m,z])
+                                edges.append([i,j,k,m,z,i,j+1,k,m,z])
+                                edges.append([i,j,k,m,z,i+1,j,k,m,z])
+
+        cpy_edges = edges[:]
+        edgesAdded = copy.deepcopy(edges)
+        for ed in cpy_edges:
+            src=ed[0:5]
+            tar=ed[5:10]
+            if random.random() < pR:
+                tar = random.choice(nodes)
+                o1=[src[0],src[1],src[2],src[3],src[4],tar[0],tar[1],tar[2],tar[3],tar[4]]
+                o2=[tar[0],tar[1],tar[2],tar[3],tar[4],src[0],src[1],src[2],src[3],src[4]]
+                while tar == src or o1 in edgesAdded or o2 in edgesAdded:
+                    o1=[src[0],src[1],src[2],src[3],src[4],tar[0],tar[1],tar[2],tar[3],tar[4]]
+                    o2=[tar[0],tar[1],tar[2],tar[3],tar[4],src[0],src[1],src[2],src[3],src[4]]
+                    tar = random.choice(nodes)
+                edgesAdded.append([src[0],src[1],src[2],src[3],src[4],tar[0],tar[1],tar[2],tar[3],tar[4]])
+                edgesAdded.remove(ed)
+                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (src[0],src[1],src[2],src[3],src[4],tar[0],tar[1],tar[2],tar[3],tar[4]))
+            else:
+                f.write('    <edge source="(%d, %d, %d, %d, %d)" target="(%d, %d, %d, %d, %d)" />\n' % (src[0],src[1],src[2],src[3],src[4],tar[0],tar[1],tar[2],tar[3],tar[4]))
+
+        f.write('  </graph>\n')
+        f.write('</graphml>')
+
 
 if __name__ == '__main__':
     main()
-
